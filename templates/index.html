@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>KodieBlox - Programming Environment for Kodiebot</title>
+	 <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+	<script type="text/javascript" src="{{ url_for('static',filename='js/jquery.js')}}"></script>
+	<script type="text/javascript" src="{{ url_for('static',filename='js/bootstrap.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/blockly.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/blocks.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/en.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/python.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/kb_blocks.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/kb_python.js')}}"></script>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='js/bootstrap.css')}}">
+
+	<style>
+  #blocklyContainer{
+	position relative
+  width 100%
+  height 100vh
+}
+#blocklyDiv{
+  position absolute
+  top 0
+  left 0
+  right 0
+  bottom 0
+}
+    .backgrnd{
+    	background-color: #0055d4ff;
+    }
+
+td {
+  text-align:center; 
+    vertical-align:middle;
+}
+.navbar-default {
+    background-color: #0055d4ff;
+    border-color: #E7E7E7;
+}
+  .navbar {
+  min-height: 80px;
+}
+
+.navbar-brand {
+  padding: 0 15px;
+  height: 80px;
+  line-height: 80px;
+}
+
+.navbar-toggle {
+  /* (80px - button height 34px) / 2 = 23px */
+  margin-top: 23px;
+  padding: 9px 10px !important;
+}
+
+@media (min-width: 768px) {
+  .navbar-nav > li > a {
+    /* (80px - line-height of 27px) / 2 = 26.5px */
+    padding-top: 26.5px;
+    padding-bottom: 26.5px;
+    line-height: 27px;
+  }
+}
+.dropdown-menu > li > a:hover {
+    background-color: #0055d4ff;
+    background-image: none;
+    color: white;
+}
+.navbar .nav > li.dropdown.open.active > a:hover, 
+.navbar .nav > li.dropdown.open > a
+{
+   color:#fff;
+   background-color: blue;
+   border-color: #fff;
+}
+.navbar { margin-bottom: 0}
+  </style>
+	
+</head>
+
+
+
+
+<body>
+
+<!-- UI design for the Front End of Kodieblox-->
+
+<nav class="navbar navbar-default navbar-static-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+      <a class="navbar-brand" href="#"><img src="{{url_for('static',filename='kodieblox_logo.png')}}" style="max-width: 240px"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+          <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="color: white; font-size: 25px;">File<span class="caret"></span></a>
+          <ul class="dropdown-menu" style="font-size: 25px;">
+            <li><a href="#" id="new_file"><span class="glyphicon glyphicon-file"></span> New</a></li>
+            <li><a href="#" id="load_file"><span class="glyphicon glyphicon-folder-open"></span> Load</a></li>
+            <li><a href="#" id="save_file"><span class="glyphicon glyphicon-floppy-disk"></span> Save</a></li>
+            <li><a href="#" id="download_file"><span class="glyphicon glyphicon-save"></span> Download to PC</a></li>
+            <li><a href="#" id="upload_file"><span class="glyphicon glyphicon-open"></span> Upload from PC</a></li>
+          </ul>
+
+        </li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a id="poweroff" style="color:white; font-size: 20px;" href="#"><span class="glyphicon glyphicon-off"></span> PowerOff</a></li>
+      </ul>
+
+    </div>
+    <!--/.nav-collapse -->
+  </div>
+  <!--/.container-fluid -->
+</nav>
+   <div style="padding-bottom: 5px; padding-top: 5px; padding-left: 25px">    
+      <a href="#" id="run"><button id="startbtn" class ="btn btn-lg btn-success">Start the Program</button></a>
+      <a href="#" id="stop"><button id="stopbtn" class ="btn btn-lg btn-danger"> Stop / Quit</button></a>
+      <a href="#" id="show"><button id="showbtn" class ="btn btn-lg btn-primary"> Show Code</button></a>
+    <a style="padding-left: 100px"> <button class ="btn btn-lg btn-warning">Sensor Readings</button></a>
+             
+ </div >
+ 
+
+
+<!-- Inclusion of the all the blocks of the program-->
+{% include "blocks.html" %}
+
+
+<!-- Including all the modals used in the Kodieblox programming-->
+
+{% include "kb_modal.html" %}
+
+<!-- Positioning the Blocklydiv in Html-->
+ <div id="blocklyDiv" style="height: 500px; width: 100%"></div> 
+
+
+<script type="text/javascript">
+  
+	var kb_workspace = Blockly.inject('blocklyDiv',
+        {media:"{{url_for('static',filename='js/media/')}}",
+        	toolbox: document.getElementById('toolbox'),scrollbars: true,grid : {
+		spacing : 20, 
+		length : 1, 
+		colour : '#888', 
+		snap : true
+	}, 
+	zoom : {
+		controls : true, 
+		wheel : true, 
+		startScale : 1.15, 
+		maxScale : 3, 
+		minScale : 0.3, 
+		scaleSpeed : 1.2
+	}});
+
+	
+	var xml = '<xml><block type="start_block" movable="false" deletable="false" id="st_blk"  x="'+$(".blocklyFlyout").width()+ '" y="50"></block></xml>';
+	Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(xml), kb_workspace);	
+
+kb_workspace.addChangeListener(Blockly.Events.disableOrphans);
+    	
+    
+</script>
+<!-- Script for the Ajax call to the Flask environment -->
+<script type="text/javascript">
+
+
+   	
+
+	
+	$(document).ready(
+		function(){
+    var blocks_count;
+    var prog_name;
+
+  /* Function to set the name variable with name of the file selected 
+  in the list*/
+
+  $("#myList").on('click','a',function(){
+      
+     prog_name = $(this).attr('id');
+      
+      
+    });
+  //End of Function
+
+
+  /*Function to send the code data as string to the flask server. This function also checks the
+        availability of the block codes inside the workspace*/
+
+			$("#run").click(function(){
+				Blockly.Python.INFINITE_LOOP_TRAP = null;
+    			var code = Blockly.Python.workspaceToCode(kb_workspace);
+      			if(code != ''){
+      	$("#startbtn").addClass("btn-warning");
+				$("#startbtn").text("Running");
+				$("#startbtn").attr('disabled',true);
+
+				$.getJSON("/process",{'data':code},function(data){
+					if(data == "Done"){
+						$("#startbtn").removeClass("btn-warning");
+						$("#startbtn").attr('disabled',false);
+						$("#startbtn").text("Start the Program");
+					}
+				    
+				});
+			}
+			else{
+			$("#noblocksModal").modal();
+			}
+			
+		});
+     // End of start button function
+      
+  /* Function to stop the current program running in the bot. This also resets the UI of the
+         start button to the initial state. */
+			$("#stop").click(function(){
+				$.getJSON("/stop",function(data){
+					if(data == "Terminated"){
+						$("#startbtn").attr('disabled',false);
+						$("#startbtn").addClass("btn-success");
+						$("#startbtn").text("Start the Program");
+					}
+				});
+			});
+      // End of Stop Button function
+
+
+/* Function to chek the code is correctly generated or not*/
+	$("#showbtn").click(function(){
+	Blockly.Python.INFINITE_LOOP_TRAP = null;
+	var code = Blockly.Python.workspaceToCode(kb_workspace);
+	alert(code);
+});
+
+
+  /* Function to create a new file, this simply clears the main workspace */
+      $("#new_file").click(function(){
+
+          Blockly.mainWorkspace.clear();
+          var xml = '<xml><block type="start_block" movable="false" deletable="false" id="st_blk"  x="'+$(".blocklyFlyout").width()+ '" y="50"></block></xml>';
+        Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(xml), kb_workspace); 
+        
+      });
+    // End of Function
+		
+  /* Function to load the modal - loadModal also receives the list of file available in the program 
+    directory to be displayed in the load modal */
+
+    $('#load_file').click(function(){
+      
+      $.getJSON('/load_file',function(data){
+        console.log(data);
+        $("#myList").empty();
+        var $myList = $("#myList");
+
+         var newItems = [];
+         $.each( data, function( index, value ) {
+        newItems.push( "<a href='#' class='list-group-item'"+ "id="+value+">" + value + "</a>" );
+      });
+          $myList.append( newItems.join( "" ) );
+          //$myList.listview( "refresh" );
+          $("#myList").trigger("create")
+          $('#loadModal').modal();
+      });
+        
+      });
+
+    //End of Load File Modal Functions
+
+  
+  /* Function for the open button of the Load File Modal. This returns the available program to the 
+     workspace */
+    $("#open_file").click(function(){
+      Blockly.mainWorkspace.clear();
+      $.getJSON('/open_file',{'data':prog_name},function(data){
+        var xml = Blockly.Xml.textToDom(data);
+        Blockly.Xml.domToWorkspace(xml, kb_workspace);
+        $('#loadModal').modal('hide');
+      });
+    });
+
+    //End of open button function
+
+
+  /* Function for saving the current program in the workspace. this simply loads the dialog only*/
+    $('#save_file').click(function(){
+      $('#saveModal').modal();
+      $("#program_name").val('');
+    });
+    //End of save modal
+
+
+  /* Function for the save file button inside the save modal */  
+
+    $("#save_file_btn").click(function(){
+
+      var xml = Blockly.Xml.workspaceToDom(kb_workspace);
+      var xml_text = Blockly.Xml.domToText(xml);
+      var prog_name = $('#program_name').val();
+      if (!$.trim($('#program_name').val())) {
+               alert("Name Field Cannot be Empty");
+            }
+      else{
+      $.getJSON('/save_file',{'prog':xml_text,'prog_name':prog_name},function(sdata){
+        if(sdata=="saved"){
+        $("#saveModal").modal('hide');
+        }
+        if(sdata=="file_available"){
+         alert("FileName Already Exists"); 
+        }
+        
+      });
+    }
+      
+    });
+
+  //End of save file button function
+
+
+  /* Function for the Download button, the blocks in the current workspace will be downloaded to the user
+  computer with the filename specified in the textbox field*/
+
+  $("#download_file").click(function(){
+  $("#downloadModal").modal();
+  $("#get_file_name").val('') ;
+
+});
+
+ //End of Download to PC Function
+
+
+/* Function for the download file button in the download to pc dialog */
+
+$("#download_file_btn").click(function(){
+
+
+
+      var xml = Blockly.Xml.workspaceToDom(kb_workspace);
+      var xml_text = Blockly.Xml.domToText(xml);
+      var textFileAsBlob = new Blob([xml_text], {type:'text/plain'});
+      var downloadLink = document.createElement("a");
+      downloadLink.download = $("#get_file_name").val()+".kbx";
+      downloadLink.innerHTML = "Download File";
+      if (window.URL != null)
+      {
+    // Chrome allows the link to be clicked
+    // without actually adding it to the DOM.
+        downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+      }
+      else
+      {
+    // Firefox requires the link to be added to the DOM
+    // before it can be clicked.
+        downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+        downloadLink.onclick = destroyClickedElement;
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+      }
+      downloadLink.click();
+      $("#downloadModal").modal('hide');    
+
+
+    });
+
+    //End of Download File Button function
+
+  /* Function for upload modal*/
+  $("#upload_file").click(function(){
+    $("#uploadModal").modal();
+
+    });
+
+  //End of Upload Modal Function
+
+  $("#delete_file").click(function(){
+    $.getJSON('/delete_file',{'data':prog_name},function(data){
+      alert(prog_name+" Deleted!");
+      $("#loadModal").modal('hide');
+      
+    });
+  });
+
+/*Function to open the poweroff modal */
+
+$("#poweroff").click(function(){
+$("#poweroffModal").modal();
+});
+
+//End of Function poweroff modal
+
+/* Function to shutdown the Kodiebot */
+
+$("#poweroffbtn").click(function(){
+	$("#poweroffModal").modal('hide');
+	$.getJSON('/poweroff',function(data){
+	console.log(data);});
+
+});
+
+//End of poweroff function
+
+/*Function to Reboot the Kodiebot*/
+$("#rebootbtn").click(function(){
+$("#poweroffModal").modal('hide');
+$.getJSON('/reboot',function(data){
+console.log(data);});
+});
+
+//End of Reboot Function
+
+
+});
+
+function loadFileAsText()
+{
+  Blockly.mainWorkspace.clear();
+  var fileToLoad = document.getElementById("upld_file").files[0];
+
+  var fileReader = new FileReader();
+  fileReader.onload = function(fileLoadedEvent) 
+  {
+    var textFromFileLoaded = fileLoadedEvent.target.result;
+    var xml = Blockly.Xml.textToDom(textFromFileLoaded);
+    Blockly.Xml.domToWorkspace(xml, kb_workspace);
+    
+  };
+  fileReader.readAsText(fileToLoad, "UTF-8");
+  $("#uploadModal").modal('hide');
+} 
+
+
+function destroyClickedElement(event)
+{
+  document.body.removeChild(event.target);
+}
+
+</script>
+
+</body>
+</html>
