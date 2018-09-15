@@ -7,5 +7,5 @@ To run this software execute from the terminal
 ```
 git clone https://github.com/redshaderobotics/kodieblox.git
 cd kodieblox
-sudo python /home/kodiebot/kodieblox/main.py
+sudo python main.py
 ```
