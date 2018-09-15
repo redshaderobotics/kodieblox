@@ -5,5 +5,7 @@ Kodieblox is designed and developed using the python language with web frame wor
 # Installing / Running the Software
 To run this software execute from the terminal
 ```
+git clone https://github.com/redshaderobotics/kodieblox.git
+cd kodieblox
 sudo python /home/kodiebot/kodieblox/main.py
 ```
